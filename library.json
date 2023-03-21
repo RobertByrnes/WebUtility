@@ -16,7 +16,7 @@
         "maintainer": true
       }
     ],
-    "license": "mit",
+    "license": "MIT",
     "frameworks": "*",
     "platforms": "espressif32, arduino",
     "headers": ["semver.hpp", "modem.hpp", "https.hpp"],
