@@ -1,0 +1,31 @@
+{
+    "name": "WebUtility",
+    "version": "0.0.1",
+    "description": "Make smart and safe communications over the web using modern authentiction protocols",
+    "keywords": "http, https, esp32, esp32-s2, esp32-c3, esp32-s3",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/RobertByrnes/WebUtility.git"
+    },
+    "authors":
+    [
+      {
+        "name": "Robert Byrnes",
+        "email": "robbyrnes@hotmail.co.uk",
+        "maintainer": true
+      }
+    ],
+    "license": "mit",
+    "frameworks": "*",
+    "platforms": "espressif32, arduino",
+    "headers": ["semver.hpp", "modem.hpp", "https.hpp"],
+    "examples": "examples/*/*",
+    "dependencies":
+    {
+        "govorox/SSLClient": "1.0.0",
+        "bakercp/CRC32": "^2.0.0",
+        "vshymanskyy/TinyGSM": "0.11.5",
+        "arduino-libraries/ArduinoHttpClient": "0.4.0"
+    }
+  }
