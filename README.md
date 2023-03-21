@@ -4,6 +4,8 @@
 
 <img src="https://img.shields.io/badge/made%20by-RobertByrnes-blue.svg" >
 
+[![stability-wip](https://img.shields.io/badge/stability-wip-lightgrey.svg)](https://github.com/mkenney/software-guides/blob/master/STABILITY-BADGES.md#work-in-progress)
+
 <!-- <img src="https://img.shields.io/npm/v/vue2-baremetrics-calendar">
 
 <img src="https://img.shields.io/badge/vue-2.6.10-green.svg"> -->
