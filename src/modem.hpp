@@ -11,7 +11,6 @@
 #define IP5306_ADDR 0x75
 #define IP5306_REG_SYS_CTL0 0x00
 #define TINY_GSM_RX_BUFFER 1024
-#define MODEM_LED_PIN 13
 
 // SIM808
 // #define TINY_GSM_MODEM_SIM808
@@ -21,7 +20,6 @@
 // #define SIM808_SERIAL Serial1
 // #define MODEM_PWRKEY 15
 // #define TINY_GSM_RX_BUFFER 1024
-// #define MODEM_LED_PIN 2
 
 #define MODEM_NO_NETWORK_CONN (1)
 #define MODEM_NO_GPRS_CONN (2)
@@ -37,10 +35,10 @@ class Modem {
     Modem() {}
     ~Modem() {}
     void setupModem();
-    bool connect(ModemDriver &sim_modem, const char *apn, const char *gprs_user, const char *gprs_pass, uint16_t ledPin=0);
+    bool connect(ModemDriver &sim_modem, const char *apn, const char *gprs_user, const char *gprs_pass);
     void awaitNetworkAvailability(ModemDriver &sim_modem, long wait=15000L);
     void verifyConnected(ModemDriver &sim_modem);
-    void connectToAPN(ModemDriver &sim_modem, const char *apn, const char *gprs_user, const char *gprs_pass, uint16_t ledPin=0);
+    void connectToAPN(ModemDriver &sim_modem, const char *apn, const char *gprs_user, const char *gprs_pass);
     void logConnectionInformation(ModemDriver &sim_modem);
     void logModemInformation(ModemDriver &sim_modem);
     #if defined(I2C_SDA) && defined(I2C_SCL) && defined(IP5306_ADDR) && defined(IP5306_REG_SYS_CTL0)
@@ -73,32 +71,28 @@ void Modem<ModemDriver>::setupModem()
     pinMode(MODEM_POWER_ON, OUTPUT);
     digitalWrite(MODEM_POWER_ON, HIGH);
     #endif
-    #if defined(MODEM_LED_PIN) // Initialize the indicator as an output
-    pinMode(MODEM_LED_PIN, OUTPUT);
-    digitalWrite(MODEM_LED_PIN, LOW);
-    #endif
 }
 
 /**
- * @brief 
+ * @brief Connect to the GPRS network
  * 
  * @param sim_modem 
  * @param apn 
  * @param gprs_user 
- * @param gprs_pass 
- * @param ledPin 
+ * @param gprs_pass
+ * @return true - connected
+ * @return false - not connected
  */
 template<class ModemDriver>
 bool Modem<ModemDriver>::connect(
     ModemDriver &sim_modem, 
     const char *apn, 
     const char *gprs_user, 
-    const char *gprs_pass, 
-    uint16_t ledPin
+    const char *gprs_pass
 ) {
     try {
         this->awaitNetworkAvailability(sim_modem);
-        this->connectToAPN(sim_modem, apn, gprs_user, gprs_pass, ledPin);
+        this->connectToAPN(sim_modem, apn, gprs_user, gprs_pass);
         this->verifyConnected(sim_modem);
         return true;
     } catch (int error) {
@@ -118,6 +112,7 @@ bool Modem<ModemDriver>::connect(
  *
  * @param sim_modem
  * @throws int MODEM_NO_NETWORK_CONN = 0;
+ * @return void
  */
 template<class ModemDriver>
 void Modem<ModemDriver>::awaitNetworkAvailability(ModemDriver &sim_modem, long wait)
@@ -134,6 +129,7 @@ void Modem<ModemDriver>::awaitNetworkAvailability(ModemDriver &sim_modem, long w
  *
  * @param sim_modem
  * @throws int MODEM_NO_GPRS_CONN = 1;
+ * @return void
  */
 template <class ModemDriver>
 void Modem<ModemDriver>::verifyConnected(ModemDriver &sim_modem)
@@ -152,27 +148,21 @@ void Modem<ModemDriver>::verifyConnected(ModemDriver &sim_modem)
  * @param apn 
  * @param gprs_user 
  * @param gprs_pass 
- * 
  * @throws int MODEM_NO_APN_CONN = 3;
+ * @return void
  */
 template<class ModemDriver>
 void Modem<ModemDriver>::connectToAPN(
     ModemDriver &sim_modem,
     const char *apn,
     const char *gprs_user,
-    const char *gprs_pass,
-    uint16_t ledPin
+    const char *gprs_pass
 ) {
     log_i("Connecting to APN: %s", apn);
     if (!sim_modem.gprsConnect(apn, gprs_user, gprs_pass)) {
         throw 3;
     } else {
         log_i("Connected, ready to send/receive");
-    }
-    if (ledPin > 0) {
-        #ifdef ARDUINO
-        digitalWrite(ledPin, HIGH);
-        #endif
     }
 }
 
@@ -181,6 +171,7 @@ void Modem<ModemDriver>::connectToAPN(
  * IMEI, Operator, Local IP and Signal Quality.
  * 
  * @param sim_modem 
+ * @return void
  */
 template<class ModemDriver>
 void Modem<ModemDriver>::logConnectionInformation(ModemDriver &sim_modem) {  
@@ -196,6 +187,7 @@ void Modem<ModemDriver>::logConnectionInformation(ModemDriver &sim_modem) {
  * and firmware version.
  * 
  * @param sim_modem 
+ * @return void
  */
 template <class ModemDriver>
 void Modem<ModemDriver>::logModemInformation(ModemDriver &sim_modem) {
@@ -208,7 +200,7 @@ void Modem<ModemDriver>::logModemInformation(ModemDriver &sim_modem) {
 /**
  * @brief Power configuration for SIM800L_IP5306_VERSION_20190610 (v1.3) board.
  * 
- * @return true 
+ * @return true  
  * @return false 
  */
 template <class ModemDriver>
