@@ -8,7 +8,6 @@ Modem<TinyGsm> modemClass;
 const char *apn = "pkp18-inet";
 const char *gprsUser = "";
 const char *gprsPass = "";
-uint16_t ledPin = 13;
 
 
 void setUp(void) {
@@ -130,8 +129,7 @@ void testConnectReturnsTrueIfModemConnectedToAPN()
         modemDriverMock, 
         apn, 
         gprsUser, 
-        gprsPass, 
-        ledPin
+        gprsPass
     );
     
     TEST_ASSERT_TRUE(connected);
@@ -144,8 +142,7 @@ void testConnectReturnsFalseIfModemFailsToConnect()
         modemDriverMock, 
         apn, 
         gprsUser, 
-        gprsPass, 
-        ledPin
+        gprsPass
     ); 
     
     TEST_ASSERT_FALSE(connected);

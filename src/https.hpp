@@ -58,7 +58,7 @@ typedef vector<Header> Headers;
 template <class ModemDriver, class HttpClientDriver>
 class HTTPS {
     public:
-    const static int _httpsTimeout = 60000L;
+    const static int _httpsTimeout = 300000L; // 5 minutes
     HTTPS() {}
     ~HTTPS() {}
     
@@ -235,7 +235,7 @@ class HTTPS {
                 while (
                     (httpClient.connected() || httpClient.available()) &&
                     (!httpClient.endOfBodyReached()) 
-                    // && ((millis() - timeoutStart) < this->_httpsTimeout)
+                    && ((millis() - timeoutStart) < this->_httpsTimeout)
                 ) {
                     if (httpClient.available()) {
                         bin = httpClient.readBytes(wbuf, sizeof(wbuf));
