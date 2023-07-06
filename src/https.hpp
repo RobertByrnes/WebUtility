@@ -36,7 +36,6 @@
 #include <string.h>
 #include <TinyGsmClient.h>
 #include <ArduinoHttpClient.h>
-#include <CRC32.h>
 #include "FS.h"
 #include "SPIFFS.h"
 #include <vector>
@@ -209,72 +208,69 @@ class HTTPS {
         HttpClientDriver &httpClient, 
         SPIFFSType &Spiffs,
         const char * resource, 
-        const char * filePath, 
-        uint32_t knownCRC32=0
+        const char * filePath
     ) {
         if (simModem.isGprsConnected()) {
-            log_i("Attempting to download");
-            httpClient.get(resource);
-            int statusCode = httpClient.responseStatusCode();
-            log_i("Status code: %i", statusCode);
-            if (this->responseOK(statusCode)) {
-                
-                if (Spiffs.exists(filePath)) {
-                    Spiffs.remove(filePath);
-                    log_i("Removed old %s", filePath);
-                }
-
-                int contentLength = httpClient.contentLength();
-                log_i("Content length: %i", contentLength);
-                int bin;
-                CRC32 crc;
-                uint8_t wbuf[HTTPS_WRITE_BUFFER];
-                uint32_t readLength = 0;
-                File file = SPIFFS.open(filePath, "a");
-                unsigned long timeoutStart = millis();
-                while (
-                    (httpClient.connected() || httpClient.available()) &&
-                    (!httpClient.endOfBodyReached()) 
-                    && ((millis() - timeoutStart) < this->_httpsTimeout)
-                ) {
-                    if (httpClient.available()) {
-                        bin = httpClient.readBytes(wbuf, sizeof(wbuf));
-                        readLength += file.write(wbuf, bin);
-                        crc.update(bin);
-                        timeoutStart = millis();
-                    } else {
-                        vTaskDelay(50);
+            if (httpClient.connected()) {
+                log_i("Attempting to download");
+                httpClient.get(resource);
+                int statusCode = httpClient.responseStatusCode();
+                log_i("Status code: %i", statusCode);
+                if (this->responseOK(statusCode)) {
+                    
+                    if (Spiffs.exists(filePath)) {
+                        Spiffs.remove(filePath);
+                        log_i("Removed old %s", filePath);
                     }
+
+                    int contentLength = httpClient.contentLength();
+                    log_i("Content length: %i", contentLength);
+                    int bin;
+                    uint8_t wbuf[HTTPS_WRITE_BUFFER];
+                    uint32_t readLength = 0;
+                    File file = SPIFFS.open(filePath, "a");
+                    unsigned long timeoutStart = millis();
+                    while (
+                        (httpClient.connected() || httpClient.available()) &&
+                        (!httpClient.endOfBodyReached()) 
+                        && ((millis() - timeoutStart) < this->_httpsTimeout)
+                    ) {
+                        if (httpClient.available()) {
+                            bin = httpClient.readBytes(wbuf, sizeof(wbuf));
+                            readLength += file.write(wbuf, bin);
+                            timeoutStart = millis();
+                        } else {
+                            vTaskDelay(50);
+                        }
+                    }
+                    log_i(
+                        "%d bytes downloaded and written to file : %s", 
+                        readLength, 
+                        file.name()
+                    );
+
+                    file.close();
+
+                    log_i("Actually read:  %u", readLength);
+                    log_i("Duration:       %us", millis() - timeoutStart);
+                    log_i("Wait for 3 seconds");
+                    vTaskDelay(3000);
+
+                    if (contentLength == -1) {
+                        return true;
+                    } else if(readLength == contentLength) {
+                        return true;
+                    }
+                } else {
+                    log_e("Modem not connected in https download");
                 }
-                log_i(
-                    "\n%d bytes downloaded and writted to file : %s", 
-                    readLength, 
-                    file.name()
-                );
-
-                file.close();
-
-                log_i("Actually read:  %u", readLength);
-                log_i("Calc. CRC32:    0x%x", crc.finalize(), HEX);
-                #if (knownCRC32 > 0)
-                log_i("Known CRC32:    0x%x", _knownCRC32, HEX);
-                #endif
-                log_i("Duration:       %us", millis() - timeoutStart);
-                log_i("Wait for 3 seconds");
-                vTaskDelay(3000);
-
-                if (contentLength == -1) {
-                    return true;
-                } else if(readLength == contentLength) {
-                    return true;
-                }
-                return false;
             } else {
-                throw 1;
+                log_e("HTTP client not connected in httpsdownload");
             }
         } else {
-            throw 0;
+            log_e("None 200 response in https download");
         }
+        return false;
     }
 
     /**
