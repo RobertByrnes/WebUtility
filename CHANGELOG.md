@@ -1,0 +1,1 @@
+- "1.1.0": "Bring in line with changes to SSLCLient, fixing tests affected by this change"

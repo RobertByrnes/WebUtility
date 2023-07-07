@@ -1,6 +1,6 @@
 {
     "name": "WebUtility",
-    "version": "0.0.4",
+    "version": "0.1.0",
     "description": "Make smart and safe communications over the web using modern authentiction protocols",
     "keywords": "http, https, esp32, esp32-s2, esp32-c3, esp32-s3",
     "repository":
