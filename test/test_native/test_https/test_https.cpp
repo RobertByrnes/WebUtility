@@ -34,97 +34,95 @@ MethodLog methodLogger;
 String successReponse = "Develop success from failures.";
 std::string requestBody = "The road to success and the road to failure are almost exactly the same.";
 Headers printHeaders = {
-    { HTTPS_HEADER_ACCEPT, HTTPS_JSON_HEADER },
-    { HTTPS_HEADER_CONTENT_TYPE, HTTPS_URLENCODED_HEADER },
-    { HTTPS_HEADER_CONTENT_LENGTH, to_string(requestBody.length()).c_str() }
+  { HTTPS_HEADER_ACCEPT, HTTPS_JSON_HEADER },
+  { HTTPS_HEADER_CONTENT_TYPE, HTTPS_URLENCODED_HEADER },
+  { HTTPS_HEADER_CONTENT_LENGTH, to_string(requestBody.length()).c_str() }
 };
 
 
 void setUp(void) {
-    modemDriverMock.reset();
-    mockHttpClient.reset();
+  modemDriverMock.reset();
+  mockHttpClient.reset();
 }
 
 void tearDown(void) {}
 
 void testGetMethodReturnsNonEmptyStringOnSuccess() {
-    modemDriverMock.returns("isGprsConnected", true);
-    mockHttpClient.returns("get", 0);
-    mockHttpClient.returns("responseStatusCode", 200);
-    mockHttpClient.returns("responseBody", successReponse);
-    std::string response = https.get(modemDriverMock, mockHttpClient, fakeResource);
-    TEST_ASSERT_EQUAL_STRING(successReponse.c_str(), response.c_str());
+  modemDriverMock.returns("isGprsConnected", true);
+  mockHttpClient.returns("get", 0);
+  mockHttpClient.returns("responseStatusCode", 200);
+  mockHttpClient.returns("responseBody", successReponse);
+  std::string response = https.get(modemDriverMock, mockHttpClient, fakeResource);
+  TEST_ASSERT_EQUAL_STRING(successReponse.c_str(), response.c_str());
 }
 
 void testGetMethodThrowsOnNone200Response() {
-    bool exceptionThrown = false;
-    try {
-        modemDriverMock.returns("isGprsConnected", true);
-        mockHttpClient.returns("get", 0);
-        mockHttpClient.returns("responseStatusCode", 403);
-        std::string response = https.get(modemDriverMock, mockHttpClient, fakeResource);
-    } catch (int exception) {
-        if (exception == 1) { exceptionThrown = true; }
+  bool exceptionThrown = false;
+  try {
+    modemDriverMock.returns("isGprsConnected", true);
+    mockHttpClient.returns("get", 0);
+    mockHttpClient.returns("responseStatusCode", 403);
+    std::string response = https.get(modemDriverMock, mockHttpClient, fakeResource);
+  } catch (int exception) {
+    if (exception == 1) {
+      exceptionThrown = true;
     }
-    TEST_ASSERT_TRUE(exceptionThrown);
+  }
+  TEST_ASSERT_TRUE(exceptionThrown);
 }
 
 void testGetMethodThrowsIfModemNotConnected() {
-    bool exceptionThrown = false;
-    try {
-        modemDriverMock.returns("isGprsConnected", false);
-        std::string response = https.get(modemDriverMock, mockHttpClient, fakeResource);
-    } catch (int exception) {
-        if (exception == 0) { exceptionThrown = true; }
+  bool exceptionThrown = false;
+  try {
+    modemDriverMock.returns("isGprsConnected", false);
+    std::string response = https.get(modemDriverMock, mockHttpClient, fakeResource);
+  } catch (int exception) {
+    if (exception == 0) {
+      exceptionThrown = true;
     }
-    TEST_ASSERT_TRUE(exceptionThrown);
+  }
+  TEST_ASSERT_TRUE(exceptionThrown);
 }
 
 void testPostJSONMethodReturnsNonEmptyStringOnSuccess() {
-    modemDriverMock.returns("isGprsConnected", true);
-    mockHttpClient.returns("post", 0);
-    mockHttpClient.returns("write", (size_t)1024);
-    mockHttpClient.returns("responseStatusCode", 200);
-    mockHttpClient.returns("isResponseChuncked", 0);
-    mockHttpClient.returns("headerAvailable", true).then(false);
-    mockHttpClient.returns("readHeaderName", String("header"));
-    mockHttpClient.returns("readHeaderValue", String("value"));
-    mockHttpClient.returns("contentLength", 1000);
-    mockHttpClient.returns("responseBody", successReponse);
-    std::string response = https.postJSON(modemDriverMock, mockHttpClient, fakeResource, requestBody);
-    TEST_ASSERT_EQUAL_STRING(successReponse.c_str(), response.c_str());
-    methodLogger.dumpMethodProfiles(mockHttpClient._methods);
+  modemDriverMock.returns("isGprsConnected", true);
+  mockHttpClient.returns("post", 0);
+  mockHttpClient.returns("write", (size_t)1024);
+  mockHttpClient.returns("connected", (uint8_t)1);
+  mockHttpClient.returns("responseStatusCode", 200);
+  mockHttpClient.returns("isResponseChuncked", 0);
+  mockHttpClient.returns("headerAvailable", true).then(false);
+  mockHttpClient.returns("readHeaderName", String("header"));
+  mockHttpClient.returns("readHeaderValue", String("value"));
+  mockHttpClient.returns("contentLength", 1000);
+  mockHttpClient.returns("responseBody", successReponse);
+  std::string response = https.postJSON(modemDriverMock, mockHttpClient, fakeResource, requestBody);
+  TEST_ASSERT_EQUAL_STRING(successReponse.c_str(), response.c_str());
+  methodLogger.dumpMethodProfiles(mockHttpClient._methods);
 }
 
 void testPostJsonMethodReturnsEmptyStringIfResponseBodyLengthZero() {
-    modemDriverMock.returns("isGprsConnected", true);
-    mockHttpClient.returns("post", 0);
-    mockHttpClient.returns("write", (size_t)1024);
-    mockHttpClient.returns("responseStatusCode", 200);
-    mockHttpClient.returns("isResponseChuncked", 0);
-    mockHttpClient.returns("headerAvailable", true).then(false);
-    mockHttpClient.returns("readHeaderName", String("header"));
-    mockHttpClient.returns("readHeaderValue", String("value"));
-    mockHttpClient.returns("contentLength", 0);
-    mockHttpClient.returns("responseBody", String(""));
-    std::string response = https.postJSON(modemDriverMock, mockHttpClient, fakeResource, requestBody);
-    TEST_ASSERT_EQUAL_STRING(String("").c_str(), response.c_str());
+  modemDriverMock.returns("isGprsConnected", true);
+  mockHttpClient.returns("post", 0);
+  mockHttpClient.returns("write", (size_t)1024);
+  mockHttpClient.returns("responseStatusCode", 200);
+  mockHttpClient.returns("isResponseChuncked", 0);
+  mockHttpClient.returns("headerAvailable", true).then(false);
+  mockHttpClient.returns("readHeaderName", String("header"));
+  mockHttpClient.returns("readHeaderValue", String("value"));
+  mockHttpClient.returns("contentLength", 0);
+  mockHttpClient.returns("responseBody", String(""));
+  std::string response = https.postJSON(modemDriverMock, mockHttpClient, fakeResource, requestBody);
+  TEST_ASSERT_EQUAL_STRING(String("").c_str(), response.c_str());
 }
 
-void testPostJsonMethodThrowsOnNone200Response() {
-    bool exceptionThrown = false;
-    try {
-        modemDriverMock.returns("isGprsConnected", true);
-        mockHttpClient.returns("post", 0);
-        mockHttpClient.returns("write", (size_t)1024);
-        mockHttpClient.returns("responseStatusCode", 500);
-        std::string response = https.postJSON(modemDriverMock, mockHttpClient, fakeResource, requestBody);
-    } catch (int exception) {
-        if (exception == 1) {
-            exceptionThrown = true;
-        }
-    }
-    TEST_ASSERT_TRUE(exceptionThrown);
+void testPostJsonMethodReturnsEmptyStringOnNone200Response() {
+  modemDriverMock.returns("isGprsConnected", true);
+  mockHttpClient.returns("post", 0);
+  mockHttpClient.returns("write", (size_t)1024);
+  mockHttpClient.returns("responseStatusCode", 500);
+  std::string response = https.postJSON(modemDriverMock, mockHttpClient, fakeResource, requestBody);
+  TEST_ASSERT_EQUAL_STRING(String("").c_str(), response.c_str());
 }
 
 void testPrintMethodReturnsNonEmptyStringOnSuccess() {
@@ -260,32 +258,17 @@ void testDownloadMethodReturnsFalseIfContentLengthCheckNotSatisfied() {
     methodLogger.dumpMethodProfiles(mockHttpClient._methods);
 }
 
-void testDownloadMethodThrowsOnNone200Response() {
-    bool exceptionThrown = false;
-    try {
-        modemDriverMock.returns("isGprsConnected", true);
-        mockHttpClient.returns("get", 0);
-        mockHttpClient.returns("responseStatusCode", 400);
-        https.download(modemDriverMock, mockHttpClient, SPIFFS, fakeResource, fakeResource);
-    } catch (int exception) {
-        if (exception == 1) {
-            exceptionThrown = true;
-        }
-    }
-    TEST_ASSERT_TRUE(exceptionThrown);
+void testDownloadMethodReturnsFalseOnNone200Response() {
+  modemDriverMock.returns("isGprsConnected", true);
+  mockHttpClient.returns("get", 0);
+  mockHttpClient.returns("responseStatusCode", 400);
+  
+  TEST_ASSERT_FALSE(https.download(modemDriverMock, mockHttpClient, SPIFFS, fakeResource, fakeResource));
 }
 
-void testDownloadMethodThrowsIfModemNotConnected() {
-    bool exceptionThrown = false;
-    try {
-        modemDriverMock.returns("isGprsConnected", false);
-        https.download(modemDriverMock, mockHttpClient, SPIFFS, fakeResource, fakeResource);
-    } catch (int exception) {
-        if (exception == 0) {
-            exceptionThrown = true;
-        }
-    }
-    TEST_ASSERT_TRUE(exceptionThrown);
+void testDownloadMethodReturnsFalseIfModemNotConnected() {
+  modemDriverMock.returns("isGprsConnected", false);
+  TEST_ASSERT_FALSE(https.download(modemDriverMock, mockHttpClient, SPIFFS, fakeResource, fakeResource));
 }
 
 void runTests() {
@@ -295,7 +278,7 @@ void runTests() {
     RUN_TEST(testGetMethodThrowsIfModemNotConnected);
     RUN_TEST(testPostJSONMethodReturnsNonEmptyStringOnSuccess);
     RUN_TEST(testPostJsonMethodReturnsEmptyStringIfResponseBodyLengthZero);
-    RUN_TEST(testPostJsonMethodThrowsOnNone200Response); // consider adding 201 to check - see responseOK function
+    RUN_TEST(testPostJsonMethodReturnsEmptyStringOnNone200Response);
     // RUN_TEST(testPrintMethodReturnsNonEmptyStringOnSuccess);
     RUN_TEST(testPrintMethodThrowsOnNone200Response);
     RUN_TEST(testPrintMethodThrowsIfModemNotConnected);
@@ -304,8 +287,8 @@ void runTests() {
     RUN_TEST(testDownloadMethodReturnsTrueIfDownloadSucceedsWithNoContentLengthHeader);
     // RUN_TEST(testDownloadMethodReturnsTrueIfDownloadSucceedsWithContentLengthHeader); 
     RUN_TEST(testDownloadMethodReturnsFalseIfContentLengthCheckNotSatisfied);
-    RUN_TEST(testDownloadMethodThrowsOnNone200Response);
-    RUN_TEST(testDownloadMethodThrowsIfModemNotConnected);
+    RUN_TEST(testDownloadMethodReturnsFalseOnNone200Response);
+    RUN_TEST(testDownloadMethodReturnsFalseIfModemNotConnected);
     RUN_TEST(testReadHeadersDoesNotThrowIfHeadersValid);
     RUN_TEST(testReadHeadersThrowsIfHeadersInvalid);
     UNITY_END();
