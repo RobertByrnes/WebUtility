@@ -1,6 +1,7 @@
+#define TINY_GSM_MODEM_SIM800
+
 #include <emulation.h>
 #include <modem.hpp>
-
 
 #define MODEM_UART Serial
 TinyGsm modemDriverMock(MODEM_UART);

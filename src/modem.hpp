@@ -1,5 +1,5 @@
 // ESP32 LilyGo-T-Call-SIM800 SIM800L_IP5306_VERSION_20190610 (v1.3) pins definition
-#define TINY_GSM_MODEM_SIM800
+#if defined(TINY_GSM_MODEM_SIM800)
 #define MODEM_RST 5
 #define MODEM_PWRKEY 4
 #define MODEM_POWER_ON 23
@@ -12,14 +12,18 @@
 #define IP5306_REG_SYS_CTL0 0x00
 #define TINY_GSM_RX_BUFFER 1024
 
-// SIM808
-// #define TINY_GSM_MODEM_SIM808
-// #define SIM808_BAUD_RATE 115200
-// #define SIM808_TX 17
-// #define SIM808_RX 16
-// #define SIM808_SERIAL Serial1
-// #define MODEM_PWRKEY 15
-// #define TINY_GSM_RX_BUFFER 1024
+// Sim 808 pins definition
+#elif defined(TINY_GSM_MODEM_SIM808)
+#define SIM808_BAUD_RATE 115200
+#define SIM808_TX 17
+#define SIM808_RX 16
+#define SIM808_SERIAL Serial1
+#define MODEM_PWRKEY 15
+#define TINY_GSM_RX_BUFFER 1024
+
+#else
+#error "You must define a modem type (TINY_GSM_MODEM_SIM800 or TINY_GSM_MODEM_SIM808)"
+#endif
 
 #define MODEM_NO_NETWORK_CONN (1)
 #define MODEM_NO_GPRS_CONN (2)
